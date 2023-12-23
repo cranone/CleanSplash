@@ -3,5 +3,6 @@
         <!-- 这里填写模块的作用域应用的包名，可以填多个。 -->
         <item>com.cainiao.wireless</item>
         <item>tv.danmaku.bili</item>
+        <item>com.tencent.mobileqq</item>
     </string-array>
 </resources>

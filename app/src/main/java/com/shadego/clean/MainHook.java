@@ -1,11 +1,14 @@
 package com.shadego.clean;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import de.robv.android.xposed.*;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
@@ -16,13 +19,29 @@ public class MainHook implements IXposedHookLoadPackage {
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
         // 过滤不必要的应用
-        if (lpparam.packageName.equals("com.cainiao.wireless")){
-            // 菜鸟裹裹
-            hookCaiNiao(lpparam);
-        }else if (lpparam.packageName.equals("tv.danmaku.bili")){
-            // 哔哩哔哩
-            hookBili(lpparam);
+        switch (lpparam.packageName) {
+            case "com.cainiao.wireless":
+                // 菜鸟裹裹
+                hookCaiNiao(lpparam);
+                break;
+            case "tv.danmaku.bili":
+                // 哔哩哔哩
+                hookBili(lpparam);
+                break;
+            case "com.tencent.mobileqq":
+                // QQ
+                hookQQ(lpparam);
+                break;
         }
+    }
+    private void hookQQ(XC_LoadPackage.LoadPackageParam lpparam){
+        Class<?> mainActivity = XposedHelpers.findClass("com.tencent.mobileqq.activity.SplashActivity", lpparam.classLoader);
+        XposedHelpers.findAndHookMethod(mainActivity, "dealFromSplashAD", new XC_MethodReplacement() {
+            @Override
+            protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+                return false;
+            }
+        });
     }
 
     private void hookBili(XC_LoadPackage.LoadPackageParam lpparam){
@@ -30,8 +49,14 @@ public class MainHook implements IXposedHookLoadPackage {
         XposedHelpers.findAndHookMethod(mainActivity,"S9","tv.danmaku.bili.ui.splash.ad.model.Splash",boolean.class,new XC_MethodHook(){
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-//                Toast.makeText((Activity) param.thisObject, "模块加载成功！", Toast.LENGTH_SHORT).show();
                 param.args[0]=null;
+            }
+        });
+
+        XposedHelpers.findAndHookMethod("tv.danmaku.bili.ui.splash.ad.c0",lpparam.classLoader, "D", Context.class,boolean.class, new XC_MethodReplacement() {
+            @Override
+            protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+                return null;
             }
         });
     }
