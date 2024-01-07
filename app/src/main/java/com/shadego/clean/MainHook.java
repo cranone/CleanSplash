@@ -42,6 +42,31 @@ public class MainHook implements IXposedHookLoadPackage {
                 return false;
             }
         });
+        Class<?> splashMiniActivity = XposedHelpers.findClass("com.tencent.mobileqq.mini.api.ISplashMiniGameStarterService", lpparam.classLoader);
+        XposedHelpers.findAndHookMethod(splashMiniActivity, "needJump", new XC_MethodReplacement() {
+            @Override
+            protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+                return false;
+            }
+        });
+        XposedHelpers.findAndHookMethod(splashMiniActivity, "needShow", new XC_MethodReplacement() {
+            @Override
+            protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+                return false;
+            }
+        });
+        Class<?> splashADUtil = XposedHelpers.findClass("com.tencent.mobileqq.splashad.SplashADUtil", lpparam.classLoader);
+        for (Method method : splashADUtil.getDeclaredMethods()) {
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            if(parameterTypes.length>0&&method.getReturnType()==boolean.class){
+                XposedBridge.hookMethod(method, new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        param.setResult(false);
+                    }
+                });
+            }
+        }
     }
 
     private void hookBili(XC_LoadPackage.LoadPackageParam lpparam){
